@@ -14,6 +14,8 @@ fn main() {
     // Load WebAssembly module from file
     let wasm_bytes = std::fs::read("../wasm/target/wasm32-wasi/release/wasm.wasm")
         .expect("Failed to read WebAssembly file");
+    // create direcotry results if not exist
+    _ = std::fs::create_dir_all("results");
 
     let iteration = Iterations {
         add: 1_000_000,
