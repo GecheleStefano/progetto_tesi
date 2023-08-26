@@ -5,10 +5,10 @@ pub extern "C" fn add(a: i32, b: i32) -> i32 {
 
 #[no_mangle]
 pub extern "C" fn factorial(n: i64) -> i64 {
-    if n == 0 || n == 1 {
-        return 1;
+    match n {
+        0 | 1 => 1,
+        _ => n * factorial(n - 1),
     }
-    n * factorial(n - 1)
 }
 
 // Function to find the square root of a number using Newton's method
@@ -26,11 +26,8 @@ pub extern "C" fn newton_sqrt(x: f64) -> f64 {
 
 #[no_mangle]
 pub extern "C" fn fibonacci(n: i32) -> i32 {
-    if n <= 0 {
-        0
-    } else if n == 1 {
-        1
-    } else {
-        fibonacci(n - 1) + fibonacci(n - 2)
+    match n {
+        0 | 1 => 1,
+        _ => fibonacci(n - 1) + fibonacci(n - 2),
     }
 }
