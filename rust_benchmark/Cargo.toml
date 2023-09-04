@@ -5,8 +5,8 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
-default = ["wasmer", "wasmtime", "wasmedge", "wasmedge_aot"]
-# wasmer
+default = ["wasmer", "wasmtime", "wasmedge", "wasmedge_aot", "wasm3"]
+# wasmer 
 wasmer = ["singlepass", "cranelift", "llvm"]
 singlepass = ["wasmer/singlepass"]
 cranelift = ["wasmer/cranelift"]
@@ -14,9 +14,13 @@ llvm = ["wasmer/llvm"]
 # wasmedge
 wasmedge = ["wasmedge-sdk", "wasmedge-types"]
 wasmedge_aot = ["wasmedge-sdk/aot", "wasmedge-types"]
+# Wasm3
+wasm3 = ["wasm3/wasi", "wasm3/std"]
+# wasm3_dep = ["wasi", "std", "use-32bit-slots", "build-bindgen"]
 
 [dependencies]
 wasmer = { version = "4.1.2", optional = true }
 wasmtime = { version = "11.0.1", optional = true }
 wasmedge-sdk = { version = "0.11.2", optional = true }
 wasmedge-types = { version = "0.4.3", optional = true }
+wasm3 = { version = "0.3.1", optional = true }

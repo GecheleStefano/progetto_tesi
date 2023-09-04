@@ -1,3 +1,5 @@
+#[cfg(feature = "wasm3")]
+mod wasm3_mod;
 #[cfg(any(feature = "wasmedge", feature = "wasmedge_aot"))]
 mod wasmedge_mod;
 #[cfg(any(feature = "singlepass", feature = "cranelift", feature = "llvm"))]
@@ -41,4 +43,8 @@ fn main() {
     wasmedge_mod::wasmedge(&wasm_bytes, "results/wasmedge.txt", &iteration);
     #[cfg(feature = "wasmedge_aot")]
     wasmedge_mod::wasmedge_aot(&wasm_bytes, "results/wasmedge_aot.txt", &iteration);
+
+    // Benchmark Wasmtime
+    #[cfg(feature = "wasm3")]
+    wasm3_mod::wasm3(&wasm_bytes, "results/wasm3.txt", &iteration);
 }
