@@ -6,6 +6,7 @@
 - wasmtime `<=11.0.2`
 - wasmedge
 - bindgen `< 0.59.1`
-- llvm-15
-  - libpolly-15-dev
+- clang-15
 - zlib1g-dev
+- gcc
+<!-- - libzstd-dev -->
