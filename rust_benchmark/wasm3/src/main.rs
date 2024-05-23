@@ -1,6 +1,29 @@
 use std::{fs::OpenOptions, io::Write, time::Instant};
 use wasm3::{Environment, Module};
 
+pub struct Iterations {
+    add: i32,
+    factorial: i64,
+    newton: i32,
+    fibonacci: i32,
+}
+fn main() {
+    // Load WebAssembly module from file
+    let wasm_bytes = std::fs::read("../wasm/target/wasm32-wasi/release/wasm.wasm")
+        .expect("Failed to read WebAssembly file");
+    // create direcotry results if not exist
+    _ = std::fs::create_dir_all("results");
+
+    let iteration = Iterations {
+        add: 1_000_000,
+        factorial: 20, //max 64 bit factorial
+        newton: 1_000_000,
+        fibonacci: 40,
+    };
+
+    wasm3(&wasm_bytes, "results/wasm3.txt", &iteration);
+}
+
 pub fn wasm3(wasm_bytes: &[u8], path: &str, iteration: &crate::Iterations) {
     println!("Wasm3");
     _ = std::fs::remove_file(path);

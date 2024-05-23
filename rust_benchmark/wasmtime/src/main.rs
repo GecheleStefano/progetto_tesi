@@ -1,6 +1,26 @@
 use std::{fs::OpenOptions, io::Write, time::Instant};
-
 use wasmtime::{Engine, Instance, Module, Store};
+pub struct Iterations {
+    add: i32,
+    factorial: i64,
+    newton: i32,
+    fibonacci: i32,
+}
+fn main() {
+    let wasm_bytes = std::fs::read("../wasm/target/wasm32-wasi/release/wasm.wasm")
+        .expect("Failed to read WebAssembly file");
+    // create direcotry results if not exist
+    _ = std::fs::create_dir_all("results");
+
+    let iteration = Iterations {
+        add: 1_000_000,
+        factorial: 20, //max 64 bit factorial
+        newton: 1_000_000,
+        fibonacci: 40,
+    };
+
+    wasmtime(&wasm_bytes, "results/wasmtime.txt", &iteration);
+}
 
 pub fn wasmtime(wasm_bytes: &[u8], path: &str, iteration: &crate::Iterations) {
     println!("Wasmtime");
@@ -79,4 +99,3 @@ pub fn wasmtime(wasm_bytes: &[u8], path: &str, iteration: &crate::Iterations) {
     }
     writeln!(output, "{:?}", results).unwrap();
 }
-

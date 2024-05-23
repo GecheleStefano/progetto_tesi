@@ -1,0 +1,15 @@
+[package]
+name = "wasmer"
+version = "0.1.0"
+edition = "2021"
+
+# [features]
+# default = ["wasmer"]
+# # wasmer 
+# wasmer = ["singlepass", "cranelift", "llvm"]
+# singlepass = ["wasmer/singlepass"]
+# cranelift = ["wasmer/cranelift"]
+# llvm = ["wasmer/llvm"]
+
+[dependencies]
+wasmer = { version = "4.3.0", features = ["singlepass", "cranelift", "llvm"] }

@@ -1,16 +1,43 @@
 use std::{fs::OpenOptions, io::Write, time::Instant};
-#[cfg(feature = "cranelift")]
+
 use wasmer::Cranelift;
-#[cfg(feature = "singlepass")]
+
 use wasmer::Singlepass;
-#[cfg(feature = "llvm")]
+
 use wasmer::LLVM;
 use wasmer::{imports, Instance, Module, Store};
+
+pub struct Iterations {
+    add: i32,
+    factorial: i64,
+    newton: i32,
+    fibonacci: i32,
+}
+fn main() {
+    let wasm_bytes = std::fs::read("../wasm/target/wasm32-wasi/release/wasm.wasm")
+        .expect("Failed to read WebAssembly file");
+    // create direcotry results if not exist
+    _ = std::fs::create_dir_all("results");
+
+    let iteration = Iterations {
+        add: 1_000_000,
+        factorial: 20, //max 64 bit factorial
+        newton: 1_000_000,
+        fibonacci: 40,
+    };
+
+    singlepass(&wasm_bytes, "results/wasmer_singlepass.txt", &iteration);
+
+    cranelift(&wasm_bytes, "results/wasmer_cranelift.txt", &iteration);
+
+    llvm(&wasm_bytes, "results/wasmer_llvm.txt", &iteration);
+}
+
 // use wasmer_compiler_cranelift::Cranelift;
 // use wasmer_compiler_llvm::LLVM;
 
 // use wasmer_compiler_singlepass::Singlepass;
-#[cfg(feature = "singlepass")]
+
 pub fn singlepass(wasm_bytes: &Vec<u8>, path: &str, iteration: &crate::Iterations) {
     //let path = "results-wasmer.txt";
     println!("Wasmer Singlepass");
@@ -18,7 +45,7 @@ pub fn singlepass(wasm_bytes: &Vec<u8>, path: &str, iteration: &crate::Iteration
     let store = Store::new(compiler);
     run(store, wasm_bytes, path, iteration);
 }
-#[cfg(feature = "cranelift")]
+
 pub fn cranelift(wasm_bytes: &Vec<u8>, path: &str, iteration: &crate::Iterations) {
     // Use Cranelift compiler with the default settings
     println!("Wasmer Cranelift");
@@ -29,7 +56,7 @@ pub fn cranelift(wasm_bytes: &Vec<u8>, path: &str, iteration: &crate::Iterations
 
     run(store, wasm_bytes, path, iteration);
 }
-#[cfg(feature = "llvm")]
+
 pub fn llvm(wasm_bytes: &Vec<u8>, path: &str, iteration: &crate::Iterations) {
     // Use Cranelift compiler with the default settings
     println!("Wasmer LLVM");

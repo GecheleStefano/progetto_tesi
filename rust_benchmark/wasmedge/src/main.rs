@@ -1,19 +1,43 @@
 use std::{fs::OpenOptions, io::Write, time::Instant};
-#[cfg(feature = "wasmedge_aot")]
-use wasmedge_sdk::{config::CompilerConfigOptions, Compiler, CompilerOutputFormat};
+
 use wasmedge_sdk::{
-    config::{self, CommonConfigOptions, ConfigBuilder, HostRegistrationConfigOptions},
-    params, VmBuilder, WasmVal,
+    config::{
+        self, CommonConfigOptions, CompilerConfigOptions, ConfigBuilder, HostRegistrationConfigOptions, RuntimeConfigOptions
+    }, params, Compiler, CompilerOptimizationLevel, CompilerOutputFormat, VmBuilder, WasmVal
 };
 
-#[cfg(feature = "wasmedge")]
+pub struct Iterations {
+    add: i32,
+    factorial: i64,
+    newton: i32,
+    fibonacci: i32,
+}
+
+fn main() {
+    let wasm_bytes = std::fs::read("../wasm/target/wasm32-wasi/release/wasm.wasm")
+        .expect("Failed to read WebAssembly file");
+    // create direcotry results if not exist
+    _ = std::fs::create_dir_all("results");
+
+    let iteration = Iterations {
+        add: 1_000_000,
+        factorial: 20, //max 64 bit factorial
+        newton: 1_000_000,
+        fibonacci: 40,
+    };
+
+    wasmedge(&wasm_bytes, "results/wasmedge.txt", &iteration);
+
+    wasmedge_aot(&wasm_bytes, "results/wasmedge_aot.txt", &iteration);
+}
+
 pub fn wasmedge(wasm_bytes: &Vec<u8>, path: &str, iteration: &crate::Iterations) {
     //let path = "results-wasmedge.txt";
     //File::create(path).expect("Failed to create path");
     // create a config with the `wasi` option enabled
     println!("Wasmedge");
     let config = ConfigBuilder::new(CommonConfigOptions::default())
-        .with_host_registration_config(HostRegistrationConfigOptions::default().wasi(true))
+        .with_runtime_config(RuntimeConfigOptions::default())
         .build()
         .unwrap();
 
@@ -21,7 +45,7 @@ pub fn wasmedge(wasm_bytes: &Vec<u8>, path: &str, iteration: &crate::Iterations)
 }
 
 // aot mode
-#[cfg(feature = "wasmedge_aot")]
+
 pub fn wasmedge_aot(wasm_bytes: &Vec<u8>, path: &str, iteration: &crate::Iterations) {
     //let path = "results-wasmedge_aot.txt";
     //File::create(path).expect("Failed to create path");
@@ -35,7 +59,7 @@ pub fn wasmedge_aot(wasm_bytes: &Vec<u8>, path: &str, iteration: &crate::Iterati
         .with_compiler_config(
             CompilerConfigOptions::default()
                 .out_format(CompilerOutputFormat::Wasm)
-                .optimization_level(wasmedge_types::CompilerOptimizationLevel::O3),
+                .optimization_level(CompilerOptimizationLevel::O3),
         )
         .with_host_registration_config(HostRegistrationConfigOptions::default().wasi(true))
         .build()
@@ -79,6 +103,13 @@ fn run(wasm_bytes: &Vec<u8>, config: config::Config, path: &str, iteration: &cra
         .unwrap()
         .register_module_from_bytes("extern", wasm_bytes)
         .unwrap();
+
+    // let result = vm.run_func(None, "fib", params!(10i32));
+    // assert!(result.is_ok());
+    // let returns = result.unwrap();
+    // assert_eq!(returns.len(), 1);
+    // assert_eq!(returns[0].to_i32(), 89);
+
     // add
     let mut results = vec![];
     for i in 0..iteration.add {
