@@ -1,11 +1,12 @@
-use std::{fs::OpenOptions, io::Write, time::Instant};
+use std::{collections::HashMap, fs::OpenOptions, io::Write, time::Instant};
 
 use wasmedge_sdk::{
     config::{
-        self, CommonConfigOptions, CompilerConfigOptions, ConfigBuilder,
-        HostRegistrationConfigOptions, RuntimeConfigOptions,
+        self, CommonConfigOptions, CompilerConfigOptions, ConfigBuilder, RuntimeConfigOptions,
     },
-    params, Compiler, CompilerOptimizationLevel, CompilerOutputFormat, VmBuilder, WasmVal,
+    params,
+    vm::SyncInst,
+    Compiler, CompilerOptimizationLevel, CompilerOutputFormat, Module, Store, Vm, WasmVal,
 };
 
 pub struct Iterations {
@@ -63,7 +64,6 @@ pub fn wasmedge_aot(wasm_bytes: &Vec<u8>, path: &str, iteration: &crate::Iterati
                 .out_format(CompilerOutputFormat::Wasm)
                 .optimization_level(CompilerOptimizationLevel::O3),
         )
-        .with_host_registration_config(HostRegistrationConfigOptions::default().wasi(true))
         .build()
         .unwrap();
 
@@ -99,24 +99,16 @@ fn run(wasm_bytes: &Vec<u8>, config: config::Config, path: &str, iteration: &cra
         .open(path)
         .unwrap();
 
-    let vm = VmBuilder::new()
-        .with_config(config)
-        .build()
-        .unwrap()
-        .register_module_from_bytes("extern", wasm_bytes)
-        .unwrap();
-
-    // let result = vm.run_func(None, "fib", params!(10i32));
-    // assert!(result.is_ok());
-    // let returns = result.unwrap();
-    // assert_eq!(returns.len(), 1);
-    // assert_eq!(returns[0].to_i32(), 89);
+    let mut vm =
+        Vm::new(Store::new(Some(&config), HashMap::<String, &mut dyn SyncInst>::new()).unwrap());
+    let module = Module::from_bytes(None, wasm_bytes).unwrap();
+    vm.register_module(None, module).unwrap();
 
     // add
     let mut results = vec![];
     for i in 0..iteration.add {
         let start_time = Instant::now();
-        let _result = vm.run_func(Some("extern"), "add", params!(i, i)).unwrap();
+        let _result = vm.run_func(None, "add", params!(i, i)).unwrap();
         let time = start_time.elapsed();
 
         results.push(time.as_nanos());
@@ -127,9 +119,7 @@ fn run(wasm_bytes: &Vec<u8>, config: config::Config, path: &str, iteration: &cra
     let mut results = vec![];
     for i in 0..=iteration.factorial {
         let start_time = Instant::now();
-        let _result = vm
-            .run_func(Some("extern"), "factorial", params!(i))
-            .unwrap();
+        let _result = vm.run_func(None, "factorial", params!(i)).unwrap();
         let time = start_time.elapsed();
         results.push(time.as_nanos());
     }
@@ -139,9 +129,7 @@ fn run(wasm_bytes: &Vec<u8>, config: config::Config, path: &str, iteration: &cra
     let mut results = vec![];
     for i in 0..iteration.newton {
         let start_time = Instant::now();
-        let _result = vm
-            .run_func(Some("extern"), "newton_sqrt", params!(i as f64))
-            .unwrap();
+        let _result = vm.run_func(None, "newton_sqrt", params!(i as f64)).unwrap();
         let time = start_time.elapsed();
         results.push(time.as_nanos());
     }
@@ -151,9 +139,7 @@ fn run(wasm_bytes: &Vec<u8>, config: config::Config, path: &str, iteration: &cra
     let mut results = vec![];
     for i in 0..iteration.fibonacci {
         let start_time = Instant::now();
-        let _result = vm
-            .run_func(Some("extern"), "fibonacci", params!(i))
-            .unwrap();
+        let _result = vm.run_func(None, "fibonacci", params!(i)).unwrap();
         let time = start_time.elapsed();
         results.push(time.as_nanos());
     }
