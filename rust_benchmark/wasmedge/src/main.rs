@@ -2,8 +2,10 @@ use std::{fs::OpenOptions, io::Write, time::Instant};
 
 use wasmedge_sdk::{
     config::{
-        self, CommonConfigOptions, CompilerConfigOptions, ConfigBuilder, HostRegistrationConfigOptions, RuntimeConfigOptions
-    }, params, Compiler, CompilerOptimizationLevel, CompilerOutputFormat, VmBuilder, WasmVal
+        self, CommonConfigOptions, CompilerConfigOptions, ConfigBuilder,
+        HostRegistrationConfigOptions, RuntimeConfigOptions,
+    },
+    params, Compiler, CompilerOptimizationLevel, CompilerOutputFormat, VmBuilder, WasmVal,
 };
 
 pub struct Iterations {
@@ -14,7 +16,7 @@ pub struct Iterations {
 }
 
 fn main() {
-    let wasm_bytes = std::fs::read("../wasm/target/wasm32-wasi/release/wasm.wasm")
+    let wasm_bytes = std::fs::read("../../wasm/target/wasm32-wasi/release/wasm.wasm")
         .expect("Failed to read WebAssembly file");
     // create direcotry results if not exist
     _ = std::fs::create_dir_all("results");

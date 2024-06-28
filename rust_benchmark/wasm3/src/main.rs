@@ -9,7 +9,7 @@ pub struct Iterations {
 }
 fn main() {
     // Load WebAssembly module from file
-    let wasm_bytes = std::fs::read("../wasm/target/wasm32-wasi/release/wasm.wasm")
+    let wasm_bytes = std::fs::read("../../wasm/target/wasm32-wasi/release/wasm.wasm")
         .expect("Failed to read WebAssembly file");
     // create direcotry results if not exist
     _ = std::fs::create_dir_all("results");
@@ -64,7 +64,7 @@ pub fn wasm3(wasm_bytes: &[u8], path: &str, iteration: &crate::Iterations) {
     }
     writeln!(output, "{:?}", results).unwrap();
 
-    //factorial
+        //factorial
     let mut results = vec![];
     for i in 0..iteration.factorial {
         let start_time = Instant::now();
